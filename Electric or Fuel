@@ -1,0 +1,108 @@
+import matplotlib.pyplot as plt
+
+def main():
+    # Input
+    combustion_car_cost = float(input("Enter the cost of the combustion car: "))
+    electric_car_cost = float(input("Enter the cost of the electric car: "))
+    annual_km = int(input("Enter the number of kilometers traveled annually: "))
+    combustion_refueling_cost = float(input("Enter the cost per liter for refueling the combustion car: "))
+    home_charging_cost = float(input("Enter the cost of electric charging at home (cost per kWh): "))
+    fast_charging_cost = float(input("Enter the cost of electric charging in a fast charging station (cost per kWh): "))
+    home_charging_percentage = float(input("Provide an approximate percentage estimate indicating the proportion of charging done at home: "))
+    years_of_use = float(input("For how long do you want to use this car (years)? "))
+    kwh_per_100km = float(input("How many kWh does the electric car consume every 100 km? "))
+    liters_per_100km = float(input("How many liters of fuel does the combustion car consume every 100 km? "))
+    combustion_insurance_cost = float(input("Enter the cost of insurance for the combustion car: "))
+    electric_insurance_cost = float(input("Enter the cost of insurance for the electric car: "))
+    combustion_tax_cost = float(input("Enter the cost of the road tax for the combustion car: "))
+    electric_tax_cost = float(input("Enter the cost of the road tax for the electric car: "))
+    combustion_maintenance_cost = float(input("Enter an estimate of the annual maintenance cost for the combustion car: "))
+    electric_maintenance_cost = float(input("Enter an estimate of the annual maintenance cost for the electric car: "))
+    combustion_service_cost = float(input("Enter the cost of a service for the combustion car: "))
+    electric_service_cost = float(input("Enter the cost of a service for the electric car: "))
+    wallbox_cost = float(input("Enter the cost of the wallbox for the electric car: "))
+    wallbox_installation_cost = float(input("Enter the cost of installing the wallbox: "))
+    Deduction = float(input("Enter if there is a deduction for the wallbox and installation in percentage terms"))
+
+    # Calculating costs for the electric car
+    kwh_calculation = kwh_per_100km * annual_km / 100
+    annual_charging_cost = home_charging_percentage * home_charging_cost * kwh_calculation + (1 - home_charging_percentage) * kwh_calculation * fast_charging_cost
+    electric_fixed_cost = electric_car_cost + wallbox_cost * (1 - Deduction) + wallbox_installation_cost * (1 - Deduction)
+    electric_variable_cost = annual_charging_cost + electric_insurance_cost + electric_tax_cost + electric_maintenance_cost + electric_service_cost
+
+    # Calculating costs for the combustion car
+    liters_calculation = annual_km * liters_per_100km / 100
+    combustion_fixed_cost = combustion_car_cost
+    combustion_variable_cost = combustion_refueling_cost * liters_calculation + combustion_insurance_cost + combustion_tax_cost + combustion_maintenance_cost + combustion_service_cost
+
+    # Calculating break-even point
+    BEP = (combustion_fixed_cost - electric_fixed_cost) / (electric_variable_cost - combustion_variable_cost)
+
+    # Total cost of the electric car
+    total_cost_electric_car = electric_variable_cost * years_of_use + electric_fixed_cost
+
+    # Total cost of the combustion car
+    total_cost_combustion_car = combustion_variable_cost * years_of_use + combustion_fixed_cost
+
+    # Comparing variable costs
+    if combustion_variable_cost < electric_variable_cost:
+        cheaper_car = "combustion"
+        savings = electric_variable_cost - combustion_variable_cost
+        variable_savings = 1 - combustion_variable_cost / electric_variable_cost
+    else:
+        cheaper_car = "electric"
+        savings = - electric_variable_cost + combustion_variable_cost
+        variable_savings = 1 - electric_variable_cost / combustion_variable_cost
+
+    # Comparing BEP
+    if BEP > years_of_use:
+        advantage = "combustion car"
+    else:
+        advantage = "electric car"
+
+    # Output
+    print("\nComparison Results:")
+    print(f"Annual variable cost of the combustion car: {combustion_variable_cost:.2f} euros")
+    print(f"Annual variable cost of the electric car: {electric_variable_cost:.2f} euros")
+    print(f"The least expensive car to manage annually is the {cheaper_car}")
+    print(f"Annual savings: {savings:.2f} euros")
+    print(f"Annual savings in percentage terms: {variable_savings:.0%}")
+    print(f"Break even (years): {BEP:.2f} years")
+    print(f"Total cost of the electric car after {years_of_use:.2f} years of use: {total_cost_electric_car:.2f} euros")
+    print(f"Total cost of the combustion car after {years_of_use:.2f} years of use: {total_cost_combustion_car:.2f} euros")
+    print(f"In terms of BEP, analyzing both fixed and variable costs, in {years_of_use:.2f} years, the more cost-effective choice is to purchase a {advantage}")
+
+    years = list(range(int(years_of_use) + 1))
+    electric_car_costs = [electric_fixed_cost + year * electric_variable_cost for year in years]
+    combustion_car_costs = [combustion_fixed_cost + year * combustion_variable_cost for year in years]
+
+    labels = ['Electric Car', 'Combustion Car']
+
+    fixed_costs = [electric_fixed_cost, combustion_fixed_cost]
+    variable_costs = [electric_variable_cost * years_of_use, combustion_variable_cost * years_of_use]
+
+    plt.figure(figsize=(24, 12))
+
+    plt.subplot(1, 2, 1)
+    plt.bar(labels, fixed_costs, color='blue', label='Fixed Costs')
+    plt.bar(labels, variable_costs, bottom=fixed_costs, color='orange', label='Variable Costs')
+    plt.xlabel('Car Type')
+    plt.ylabel('Total Cost in Euros')
+    plt.title('Breakdown of Total Costs (Fixed + Variable) of Electric and Combustion Cars')
+    plt.legend()
+    plt.grid(True)
+
+    plt.subplot(1, 2, 2)
+    plt.plot(years, electric_car_costs, label='Electric Car', marker='o')
+    plt.plot(years, combustion_car_costs, label='Combustion Car', marker='o')
+
+    plt.xlabel('Years')
+    plt.ylabel('Cost in Euros')
+    plt.title('Comparison of Electric Car vs. Combustion Car Costs')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()
